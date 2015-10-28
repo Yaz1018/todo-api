@@ -15,46 +15,58 @@ app.get('/', function (req, res) {
 
 // GET /todos
 app.get('/todos', function (req, res) {
-    res.json(todos);
-})
-// GET /todos/:id
+        var queryParams = req.query;
+        var filteredTodos = todos;
+        if (!_.isEmpty(queryParams) && queryParams.completed === 'false') {
+            filteredTodos = _.where(filteredTodos, {
+                completed: false
+            });
+        } else if (!_.isEmpty(queryParams) && queryParams.completed === 'true') {
+            filteredTodos = _.where(filteredTodos, {
+                completed: true
+            });
+        } else if (!_.isEmpty(queryParams)){
+            res.status(404).send();
+        }
+
+        res.json(filteredTodos);
+    })
+    // GET /todos/:id
 app.get('/todos/:id', function (req, res) {
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId})
+    var matchedTodo = _.findWhere(todos, {
+        id: todoId
+    })
 
     //itterate over todos array using a forEach
-/*    todos.forEach(function (todo) {
-        if (todoId === todo.id) {
-            matchedTodo = todo;
-        }
-    });*/
+    /*    todos.forEach(function (todo) {
+            if (todoId === todo.id) {
+                matchedTodo = todo;
+            }
+        });*/
     //itterate over todos array using a for loop
-/*
-    for (i = 0; i < todos.length; i++) {
-        if (todoId === todos[i].id) {
-            matchedTodo = todos[i];
+    /*
+        for (i = 0; i < todos.length; i++) {
+            if (todoId === todos[i].id) {
+                matchedTodo = todos[i];
+            }
         }
-    }
-*/
+    */
 
     if (matchedTodo) {
         res.json(matchedTodo);
     } else {
         res.status(404).send();
     }
-
 });
 
 // POST /todos
-app.post('/todos', function(req, res) {
+app.post('/todos', function (req, res) {
     var body = req.body; //use _.pick to only pick description and completed
 
     if (!_.isBoolean(body.completed || !_.isString(body.description) || body.description.trim().length === 0)) {
         return res.status(400).send();
     }
-
-
-
     // set body.description to be trimed value
 
     body.description = body.description.trim();
@@ -70,9 +82,11 @@ app.post('/todos', function(req, res) {
 
 app.delete('/todos/:id', function (req, res) {
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId})
+    var matchedTodo = _.findWhere(todos, {
+        id: todoId
+    })
 
-    todos = _.without(todos,matchedTodo);
+    todos = _.without(todos, matchedTodo);
 
     if (todos) {
         res.json(matchedTodo);
@@ -85,7 +99,9 @@ app.delete('/todos/:id', function (req, res) {
 // PUT /todos/:id
 app.put('/todos/:id', function (req, res) {
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId})
+    var matchedTodo = _.findWhere(todos, {
+        id: todoId
+    })
     var body = _.pick(req.body, 'description', 'completed');
     var validAttributes = {};
 
@@ -111,6 +127,6 @@ app.put('/todos/:id', function (req, res) {
     res.json(matchedTodo);
 });
 
-app.listen(PORT, function() {
+app.listen(PORT, function () {
     console.log('Express listening on port ' + PORT);
 });
